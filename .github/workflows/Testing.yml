@@ -1,0 +1,50 @@
+name: Java-Build,Sonarqube and Blackduck
+
+on:
+  # for manual workflows runs
+  workflow_dispatch:
+ 
+ 
+  push:
+#      branches:
+#     - development
+#     - release
+#     - master
+#     - testing
+
+     paths-ignore:
+      - '.github/workflows/**'
+      - '**.md'
+    
+
+      
+jobs:
+   
+  Test:
+  
+    runs-on: [ dot-enterprise-runner ]
+    steps:
+    
+    - uses: actions/checkout@v3
+    
+    
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+    
+    #Setup Maven for Blackduck Scan
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: 3.8.2
+     
+    - name: Extract Maven project version
+      run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec --settings pom.xml)
+      id: project
+
+    - name: Show extracted Maven project version
+      env: 
+       VERSION: ${{ steps.project.outputs.version }
+      run: echo $VERSION
